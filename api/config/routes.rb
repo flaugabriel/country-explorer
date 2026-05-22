@@ -27,6 +27,12 @@ Rails.application.routes.draw do
 
       get '/countries/:name',         to: 'countries#show'
       get '/search_histories',        to: 'search_histories#index'
+
+      # Comentários públicos por país
+      get '/countries/:country_code/comments', to: 'comments#index'
+      post '/countries/:country_code/comments', to: 'comments#create'
+      # Likes/dislikes de comentários
+      post '/comments/:comment_id/like', to: 'comment_likes#create'
     end
 
     # for another features

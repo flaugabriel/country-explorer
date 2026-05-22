@@ -20,7 +20,7 @@ module Api
 
       def open_qrcode_mfa
         temp_blob = QrcodeCreateService.new(@resource, request).build
-        
+         
         if temp_blob.present? 
           render json: { qrcode: temp_blob.url }, status: :ok
         else

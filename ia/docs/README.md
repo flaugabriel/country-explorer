@@ -1,6 +1,6 @@
 # Country Explorer — Documentação Técnica
 
-Documentação de arquitetura e engenharia do repositório **country-explorer**: aplicação full-stack que combina **autenticação segura** (Access Security) com **exploração de países** via API externa.
+Documentação de arquitetura e engenharia do repositório **country-explorer**: aplicação full-stack que combina **autenticação segura** (Country Explorer) com **exploração de países** via API externa.
 
 > A documentação fica em `ia/docs/` (não `ai/docs`).
 
@@ -21,7 +21,7 @@ Documentação de arquitetura e engenharia do repositório **country-explorer**:
 
 ## Resumo do Projeto
 
-### Autenticação e acesso (Access Security)
+### Autenticação e acesso (Country Explorer)
 
 - **Senha segura** com regras de complexidade no cadastro
 - **Expiração de sessão** via Devise `:timeoutable` (5 minutos de inatividade)

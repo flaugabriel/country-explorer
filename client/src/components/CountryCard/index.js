@@ -9,7 +9,7 @@ const CountryCard = ({ country }) => {
     if (country.name) {
       navigate(`/countries/${encodeURIComponent(country.name)}`);
     }
-  };
+  }
 
   return (
     <div className="card shadow-sm mt-4">

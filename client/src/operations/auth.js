@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { updateAuthHeadersFromResponse } from '../utils/authHeaders';
 
 const urlBase= 'http://localhost:3030/api/';
 const urlBasePublic= 'http://localhost:3030/';
 
-export const signin = (email, password) => 
-  axios({
+export const signin = async (email, password) => {
+  const response = await axios({
     url: urlBase + 'auth/sign_in',
     method: "POST",
     headers: {
@@ -12,7 +13,10 @@ export const signin = (email, password) =>
       "Content-Type": "application/json",
     },
     data: { email: email, password: password },
-  })
+  });
+  updateAuthHeadersFromResponse(response);
+  return response;
+}
 
 export const signup = (email, password, password_confirmation) => 
   axios({

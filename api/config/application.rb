@@ -29,6 +29,7 @@ module CountryExplorerApi
     Time::DATE_FORMATS[:default] = '%d/%m/%Y %H:%M'
     Date::DATE_FORMATS[:default] = '%d/%m/%Y'
     config.paths.add(Rails.root.join('lib').to_s, eager_load: true)
+    config.autoload_paths = config.autoload_paths.dup
     config.autoload_paths += %W[#{config.root}/lib]
     config.api_only = true
     config.i18n.default_locale = :'pt-BR'

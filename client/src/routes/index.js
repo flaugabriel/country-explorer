@@ -25,7 +25,10 @@ const Private = ({ Item }) => {
   const getProfile = () => {
     session(authorization).then((items) => {
       if (items.data !== undefined) {
-        setUser(items.data.data)
+        setUser(items.data.data);
+        if (items.data.data && items.data.data.email) {
+          localStorage.setItem('email', items.data.data.email);
+        }
       }
     }).catch(error => {
       console.log(error);

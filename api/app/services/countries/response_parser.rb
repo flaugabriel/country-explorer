@@ -28,7 +28,7 @@ module Countries
         tld:            raw['tld']&.first,
         cca2:           raw['cca2'],
         cca3:           raw['cca3'],
-        ccn3:           raw['ccn3'],
+        ccn3:           raw['ccn3']&.to_s&.rjust(3, '0'),
         cioc:           raw['cioc'],
         idd:            parse_idd(raw['idd']),
         demonyms:       parse_demonyms(raw['demonyms']),
