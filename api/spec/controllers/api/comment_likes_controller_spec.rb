@@ -4,7 +4,7 @@ require 'rails_helper'
 
 describe Api::V1::CommentLikesController, type: :controller do
   let(:user) { User.create!(email: 'test@example.com', password: 'Password1!') }
-  let(:comment) { Comment.create!(country_code: 'BRA', user_email: 'a@a.com', content: 'Legal!') }
+  let(:comment) { Comment.create!(country_code: '076', user_email: 'a@a.com', content: 'Legal!') }
 
   let(:auth_headers) { user.create_new_auth_token }
 

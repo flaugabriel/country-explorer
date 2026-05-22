@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe CommentLike, type: :model do
   let(:user) { User.create!(email: 'test@example.com', password: 'Password1!') }
-  let(:comment) { Comment.create!(country_code: 'BRA', user_email: 'a@a.com', content: 'Legal!') }
+  let(:comment) { Comment.create!(country_code: '076', user_email: 'a@a.com', content: 'Legal!') }
 
   it 'is valid with valid attributes' do
     like = described_class.new(comment: comment, user: user, like: true)

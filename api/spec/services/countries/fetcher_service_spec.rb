@@ -64,7 +64,7 @@ RSpec.describe Countries::FetcherService do
 
       it 'calls the persister with the country name' do
         service.call
-        expect(persister).to have_received(:call).with('Brazil')
+        expect(persister).to have_received(:call).with('brazil')
       end
 
       it 'caches the result (http_client called only once on second call)' do

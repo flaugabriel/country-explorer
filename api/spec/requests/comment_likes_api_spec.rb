@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'CommentLikes API', type: :request do
   let(:user) { User.create!(email: 'test@example.com', password: 'Password1!') }
-  let!(:comment) { Comment.create!(country_code: 'BRA', user: user, user_email: user.email, content: 'Ótimo país!') }
+  let!(:comment) { Comment.create!(country_code: '076', user: user, user_email: user.email, content: 'Ótimo país!') }
 
   before do
     post '/api/auth/sign_in', params: { email: user.email, password: 'Password1!' }

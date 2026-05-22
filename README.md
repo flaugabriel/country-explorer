@@ -40,9 +40,27 @@ Acesse:
 
 ## Testes
 
+### Crie o banco de dados de teste:
+* No terminal, execute:
+```shell
+docker compose run --rm api bundle exec rails db:create db:migrate RAILS_ENV=test
+```
+
+* ou, se preferir, separado:
+
+```shell
+docker compose run --rm api bundle exec rails db:create RAILS_ENV=test
+docker compose run --rm api bundle exec rails db:migrate RAILS_ENV=test
+```
+
+* Depois, rode novamente os testes:
+
 ```shell
 docker compose run --rm -e RAILS_ENV=test api bundle exec rspec
 ```
+
+** Assim, os testes vão rodar normalmente e a cobertura será atualizada corretamente.
+
 
 Cobertura: `api/coverage/index.html` após rodar os testes.
 
