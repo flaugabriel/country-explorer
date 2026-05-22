@@ -5,7 +5,7 @@ import Home from "../pages/Home";
 import Signin from "../pages/Signin";
 import Signup from "../pages/Signup";
 import Password from "../pages/User/Password";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import MfaForLogin from "../pages/MfaForLogin";
 import MfaSettings from "../pages/User/MfaSettings";
 import ForgotPassword from "../pages/ForgotPassword";
@@ -44,14 +44,11 @@ const Private = ({ Item }) => {
 
   return(
     signed ? 
-    <>
-      <Navbar/>
-      <Item />
-    </>
+      <Sidebar>
+        <Item />
+      </Sidebar>
     :
-    <>
       <Signin />
-    </>
   )
 };
 
@@ -62,7 +59,7 @@ const RoutesApp = () => {
     <BrowserRouter>
       <Fragment>
         <Routes>
-          <Route exact path="/home" element={<Private Item={Home} />} />
+          <Route exact path="/home" element={<Private Item={Countries} />} />
           <Route exact path="/countries" element={<Private Item={Countries} />} />
           <Route exact path="/password" element={<Private Item={Password} />} />
           <Route exact path="/settings/mfa" element={<Private Item={MfaSettings} />} />
