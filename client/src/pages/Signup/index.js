@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { signup } from '../../operations/auth';
 import { signout } from '../../operations/auth';
 import { useNavigate } from "react-router-dom";
+import { notify, notifyApiError } from '../../utils/notify';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -25,20 +26,19 @@ const Signup = () => {
     }else{
       signup(email, password, password_confirmation).then((response) => {
         if (response.data.status === 404) {
-          alert('Verifique se o servidor esta disponivel ou tente mas tarde.');
+          notify.error('Serviço indisponível. Tente novamente mais tarde.');
           signout()
         }else{
-          alert('Cadastro realizado! \nPor favor realize o login!');
           localStorage.removeItem("authorization");
           localStorage.setItem("authorization", response.headers['authorization']);
-          alert('Bem vindo!');
+          notify.success('Cadastro realizado com sucesso!');
           setSigned(true)
           setIsup(true)
         }
-      }).catch(function (error) {
-        alert(error.response.data.errors.full_messages.toString());
+      }).catch((error) => {
+        notifyApiError(error, 'Não foi possível concluir o cadastro.');
         signout()
-      });;
+      });
     }
   };
 

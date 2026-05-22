@@ -77,6 +77,26 @@ RSpec.describe 'PasswordController', type: :request do
       end
     end
 
+    context 'when reset_password! returns false' do
+      before do
+        user.generate_password_token!
+        allow(User).to receive(:find_by).with(reset_password_token: user.reset_password_token).and_return(user)
+        allow(user).to receive(:reset_password!).and_return(false)
+        allow(user).to receive_message_chain(:errors, :full_messages).and_return(['Password is invalid'])
+      end
+
+      it 'returns 422 with validation errors' do
+        post '/password/reset', params: {
+          email: user.email,
+          token: user.reset_password_token,
+          password: 'GN&03i4686#Z',
+        }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json['error']).to eq(['Password is invalid'])
+      end
+    end
+
     context 'when token is invalid or expired' do
       it 'returns 404' do
         post '/password/reset', params: {

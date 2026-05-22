@@ -2,8 +2,8 @@
 
 ## Tecnologia
 
-**PostgreSQL** (versão estável), gerenciado via **ActiveRecord** (Rails 7).  
-A extensão `plpgsql` é habilitada para suporte a funções procedurais.
+**PostgreSQL**, gerenciado via **ActiveRecord** (Rails 7).  
+Extensão `plpgsql` habilitada.
 
 ---
 
@@ -11,6 +11,8 @@ A extensão `plpgsql` é habilitada para suporte a funções procedurais.
 
 ```mermaid
 erDiagram
+    USERS ||--o{ SEARCH_HISTORIES : "possui"
+
     USERS {
         bigint id PK
         string provider
@@ -19,23 +21,22 @@ erDiagram
         string reset_password_token
         datetime reset_password_sent_at
         boolean allow_password_change
-        datetime remember_created_at
-        string confirmation_token
-        datetime confirmed_at
-        datetime confirmation_sent_at
-        string unconfirmed_email
         integer failed_attempts
         string unlock_token
         datetime locked_at
         string email
         integer sign_in_count
-        datetime current_sign_in_at
-        datetime last_sign_in_at
-        inet current_sign_in_ip
-        inet last_sign_in_ip
         json tokens
         string otp_secret_key
         integer otp_module
+        datetime created_at
+        datetime updated_at
+    }
+
+    SEARCH_HISTORIES {
+        bigint id PK
+        bigint user_id FK
+        string country_name
         datetime created_at
         datetime updated_at
     }
@@ -45,58 +46,43 @@ erDiagram
         string key
         string filename
         string content_type
-        text metadata
-        string service_name
         bigint byte_size
-        string checksum
         datetime created_at
     }
 
     ACTIVE_STORAGE_ATTACHMENTS {
         bigint id PK
-        string name
         string record_type
         bigint record_id
         bigint blob_id FK
-        datetime created_at
-    }
-
-    ACTIVE_STORAGE_VARIANT_RECORDS {
-        bigint id PK
-        bigint blob_id FK
-        string variation_digest
     }
 
     ACTIVE_STORAGE_ATTACHMENTS ||--o{ ACTIVE_STORAGE_BLOBS : "pertence a"
-    ACTIVE_STORAGE_VARIANT_RECORDS ||--o{ ACTIVE_STORAGE_BLOBS : "pertence a"
 ```
 
 ---
 
 ## Tabela `users`
 
-Tabela central do sistema. Consolida os campos de múltiplos módulos Devise.
+Tabela central. Campos dos módulos Devise + MFA.
 
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
 | `id` | bigint PK | Identificador único |
-| `provider` | string | Provedor de autenticação (padrão: `"email"`) |
-| `uid` | string | Identificador único no provedor |
-| `encrypted_password` | string | Senha encriptada via bcrypt |
-| `reset_password_token` | string | Token de redefinição de senha (hex 20 chars) |
-| `reset_password_sent_at` | datetime | Data/hora de emissão do token |
+| `provider` | string | Provedor (padrão: `"email"`) |
+| `uid` | string | Identificador no provedor |
+| `encrypted_password` | string | Senha bcrypt |
+| `reset_password_token` | string | Token de reset (`SecureRandom.hex(10)`) |
+| `reset_password_sent_at` | datetime | Emissão do token de reset |
 | `allow_password_change` | boolean | Flag DeviseTokenAuth |
-| `confirmation_token` | string | Token de confirmação de e-mail |
-| `confirmed_at` | datetime | Confirmação de e-mail |
-| `failed_attempts` | integer | Contador de tentativas de login falhas (padrão: 0) |
-| `unlock_token` | string | Token para desbloqueio de conta |
-| `locked_at` | datetime | Momento do bloqueio da conta |
-| `sign_in_count` | integer | Total de logins realizados |
-| `current_sign_in_ip` | inet | IP do login atual |
-| `last_sign_in_ip` | inet | IP do login anterior |
-| `tokens` | json | Tokens ativos de sessão (DeviseTokenAuth) |
-| `otp_secret_key` | string | Segredo TOTP para MFA |
-| `otp_module` | integer | Estado do MFA: `0 = disabled`, `1 = enabled` |
+| `failed_attempts` | integer | Tentativas falhas (padrão: 0) |
+| `unlock_token` | string | Token Devise (não usado pelo fluxo custom de unlock) |
+| `locked_at` | datetime | Momento do bloqueio |
+| `email` | string | E-mail único |
+| `sign_in_count` | integer | Total de logins |
+| `tokens` | json | Sessões ativas (DeviseTokenAuth) |
+| `otp_secret_key` | string | Segredo TOTP |
+| `otp_module` | integer | `0 = disabled`, `1 = enabled` |
 
 ### Índices
 
@@ -109,15 +95,41 @@ Tabela central do sistema. Consolida os campos de múltiplos módulos Devise.
 
 ---
 
+## Tabela `search_histories`
+
+Registra buscas de países por usuário autenticado.
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | bigint PK | Identificador |
+| `user_id` | bigint FK | Referência a `users` |
+| `country_name` | string | Nome buscado (como enviado na requisição) |
+| `created_at` | datetime | Data da busca |
+| `updated_at` | datetime | Atualização do registro |
+
+### Índices
+
+| Índice | Coluna(s) |
+|--------|-----------|
+| `index_search_histories_on_user_id` | `user_id` |
+| `index_search_histories_on_user_id_and_created_at` | `user_id, created_at` |
+
+### Comportamento na API
+
+- Criado automaticamente após busca bem-sucedida em `Countries::HistoryPersister`.
+- Listagem (`GET /api/search_histories`): últimos 100 registros, deduplicados por `country_name` (case-insensitive), retorno limitado a **20** itens.
+
+---
+
 ## Tabelas ActiveStorage
 
-Usadas para armazenar temporariamente o QR Code PNG gerado para configuração do MFA.
+Armazenam temporariamente o PNG do QR Code para configuração MFA.
 
 | Tabela | Finalidade |
 |--------|-----------|
-| `active_storage_blobs` | Metadados e conteúdo do arquivo |
-| `active_storage_attachments` | Polimórfica — liga blobs a qualquer model |
-| `active_storage_variant_records` | Variantes transformadas de blobs |
+| `active_storage_blobs` | Metadados e conteúdo |
+| `active_storage_attachments` | Ligação polimórfica blob ↔ model |
+| `active_storage_variant_records` | Variantes de imagem |
 
 ---
 
@@ -125,15 +137,16 @@ Usadas para armazenar temporariamente o QR Code PNG gerado para configuração d
 
 | Versão | Arquivo | Descrição |
 |--------|---------|-----------|
-| `20230518142147` | `devise_create_users` | Criação da tabela `users` com todos os módulos Devise |
-| `20230710193219` | `add_otp_secret_key_to_users` | Adiciona coluna `otp_secret_key` |
-| `20230711001957` | `create_active_storage_tables` | Tabelas do ActiveStorage |
+| `20230518142147` | `devise_create_users` | Tabela `users` com módulos Devise |
+| `20230710193219` | `add_otp_secret_key_to_users` | Coluna `otp_secret_key` e `otp_module` |
+| `20230711001957` | `create_active_storage_tables` | Tabelas ActiveStorage |
+| `20230712000001` | `create_search_histories` | Tabela `search_histories` + FK para `users` |
 
 ---
 
 ## Configuração de Conexão
 
-Definida via variáveis de ambiente injetadas pelo Docker Compose:
+Variáveis injetadas pelo Docker Compose no serviço `api`:
 
 ```yaml
 POSTGRES_USER: postgres

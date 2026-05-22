@@ -4,7 +4,6 @@ class QrcodeCreateService
     ActiveStorage::Current.host = request.base_url
   end
 
-  # :nocov:
   def build
     qrcode = RQRCode::QRCode.new(@resource.provisioning_uri, size: 10, level: :h)
     png = create_png(qrcode)
@@ -36,5 +35,4 @@ class QrcodeCreateService
       size: 120
     )
   end
-  # :nocov:
 end

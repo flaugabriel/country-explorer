@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { notify } from '../../utils/notify';
 import { fetchCountry, fetchSearchHistory } from '../../operations/countries';
 import CountryCard from '../../components/CountryCard';
 import SearchInput from '../../components/SearchInput';
@@ -34,11 +34,11 @@ const Countries = () => {
       .catch((err) => {
         const status = err.response?.status;
         if (status === 404) {
-          toast.error(`País "${name}" não encontrado.`);
+          notify.error(`País "${name}" não encontrado.`);
         } else if (status === 503) {
-          toast.error('Serviço externo indisponível. Tente novamente em instantes.');
+          notify.error('Serviço externo indisponível. Tente novamente em instantes.');
         } else {
-          toast.error('Erro inesperado. Tente novamente.');
+          notify.error('Erro inesperado. Tente novamente.');
         }
       })
       .finally(() => setLoading(false));

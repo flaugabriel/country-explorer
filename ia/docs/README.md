@@ -1,6 +1,8 @@
-# Access Security — Documentação Técnica
+# Country Explorer — Documentação Técnica
 
-Documentação de arquitetura e engenharia de software do projeto **Access Security** (anteriormente `country-explorer`), uma aplicação full-stack com foco em mecanismos de acesso seguro.
+Documentação de arquitetura e engenharia do repositório **country-explorer**: aplicação full-stack que combina **autenticação segura** (Access Security) com **exploração de países** via API externa.
+
+> A documentação fica em `ia/docs/` (não `ai/docs`).
 
 ---
 
@@ -8,26 +10,34 @@ Documentação de arquitetura e engenharia de software do projeto **Access Secur
 
 | Documento | Descrição |
 |-----------|-----------|
-| [Visão Geral da Arquitetura](architecture/overview.md) | Diagrama de alto nível e decisões de design |
-| [Banco de Dados](architecture/database.md) | Esquema, entidades e migrações |
-| [API — Arquitetura](api/overview.md) | Estrutura interna da API Rails |
-| [API — Endpoints](api/endpoints.md) | Referência completa de rotas e contratos |
-| [Autenticação & Segurança](security/authentication.md) | Fluxos de auth, MFA, lockout e tokens |
-| [Frontend](frontend/overview.md) | Estrutura React, rotas e operações HTTP |
-| [Configuração & Setup](setup/getting-started.md) | Como instalar e executar localmente |
+| [Visão Geral da Arquitetura](overview.md) | Diagramas, camadas e decisões de design |
+| [Banco de Dados](database.md) | Esquema, entidades e migrações |
+| [API — Endpoints](endpoints.md) | Referência de rotas e contratos JSON |
+| [Autenticação & Segurança](authentication.md) | Fluxos de auth, MFA, lockout, tokens e ressalvas |
+| [Frontend](frontend.md) | Estrutura React, rotas e operações HTTP |
+| [Configuração & Setup](getting-started.md) | Instalação e execução local com Docker |
 
 ---
 
 ## Resumo do Projeto
 
-Sistema de autenticação segura com os seguintes mecanismos:
+### Autenticação e acesso (Access Security)
 
-- **Senha segura** com regras de complexidade rígidas
-- **Expiração de sessão** controlada via token JWT
-- **Bloqueio por tentativas** após exceder o limite de falhas
-- **Duplo fator de autenticação (MFA/TOTP)** via QR Code
-- **Recuperação de senha** com link por e-mail com expiração
-- **Desbloqueio de conta** por e-mail
+- **Senha segura** com regras de complexidade no cadastro
+- **Expiração de sessão** via Devise `:timeoutable` (5 minutos de inatividade)
+- **Bloqueio por tentativas** após 5 falhas de login
+- **Duplo fator (MFA/TOTP)** com QR Code via ActiveStorage
+- **Recuperação de senha** por e-mail (token válido por 4 horas)
+- **Desbloqueio de conta** via endpoint dedicado
+
+### Country Explorer
+
+- **Busca de países** autenticada (`GET /api/countries/:name`) integrada com [REST Countries](https://restcountries.com)
+- **Histórico de buscas** por usuário (`GET /api/search_histories`)
+- **Cache** de respostas externas (1 hora) no Rails.cache
+- **UI** em `/countries` com cards, busca e histórico clicável
+
+---
 
 ## Stack Tecnológico
 
@@ -35,8 +45,10 @@ Sistema de autenticação segura com os seguintes mecanismos:
 |--------|-----------|
 | Backend | Ruby 3.0.2 / Rails 7.0.4.3 (API mode) |
 | Frontend | React 18.2.0 |
-| Banco de Dados | PostgreSQL (stable) |
-| Containerização | Docker 24.0.0 / Docker Compose 1.29.2 |
+| Banco de Dados | PostgreSQL |
+| API externa | REST Countries (`restcountries.com`) |
+| HTTP client | Faraday 2.x |
+| Containerização | Docker / Docker Compose |
 | Autenticação | Devise + DeviseTokenAuth + devise-two-factor |
-| Comunicação | REST JSON API |
-| E-mail de desenvolvimento | MailCatcher |
+| Comunicação | REST JSON |
+| E-mail (dev) | MailCatcher |

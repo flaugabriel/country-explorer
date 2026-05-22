@@ -3,6 +3,7 @@ import * as C from "./styles";
 import Input from "../../../components/Input";
 import Button from "../../../components/Button";
 import { session, enableMfa, disableMfa, openQrcodeMfa} from "../../../operations/auth";
+import { notify, notifyApiError } from "../../../utils/notify";
 
 const MfaSettings = () => {
   const authorization = localStorage.getItem("authorization");
@@ -41,14 +42,13 @@ const MfaSettings = () => {
     enableMfa(authorization, user.id, token).then((items) => {
       if (items.data !== undefined) {
         setUser(items.data.data)
-        alert('MFA ativo!')
+        notify.success('MFA ativado com sucesso!');
+        getProfile();
       }else{
         console.log(items);
       }
-    }).catch(error => {
-      if (error.response !== undefined) {
-        alert(error.response.data.messager);
-      }
+    }).catch((error) => {
+      notifyApiError(error, 'Token inválido. Tente novamente.');
     });
   };
 
@@ -56,12 +56,13 @@ const MfaSettings = () => {
     disableMfa(authorization, user.id, token).then((items) => {
       if (items.data !== undefined) {
         setUser(items.data.data)
-        alert('MFA desativado!')
+        notify.success('MFA desativado.');
+        getProfile();
       }else{
         console.log(items);
       }
-    }).catch(error => {
-      console.log(error);
+    }).catch((error) => {
+      notifyApiError(error, 'Não foi possível desativar o MFA.');
     });
   };
 

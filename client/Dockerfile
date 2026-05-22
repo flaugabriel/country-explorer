@@ -6,12 +6,13 @@ EXPOSE 3000
 
 WORKDIR /var/www/html
 
-COPY start-client.sh $APP_HOME
-COPY package.json $APP_HOME
-COPY package-lock.json $APP_HOME
-COPY yarn.lock $APP_HOME
+COPY start-client.sh /var/www/html/
+COPY package.json /var/www/html/
+COPY package-lock.json /var/www/html/
+COPY yarn.lock /var/www/html/
 
 RUN npm config delete proxy
 RUN npm i
+RUN npm install -g serve@14.2.4
 
-ADD . $APP_HOME
+ADD . /var/www/html

@@ -4,6 +4,7 @@ import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { resetPassword } from "../../operations/auth";
 import { useLocation, useNavigate } from "react-router-dom";
+import { notify, notifyApiError, formatApiMessage } from "../../utils/notify";
 
 const UpdatePassword = () => {
   const navigate = useNavigate();
@@ -20,14 +21,13 @@ const UpdatePassword = () => {
     }else{
       resetPassword(email, password, token).then((response) => {
         if (response.data.status === 404) {
-          alert(response.data.errors[0]);
+          notify.error(response.data.errors?.[0] || formatApiMessage(response.data) || 'Link inválido ou expirado.');
         }else{
-          alert(`Verifique sua conta de email ${email}`)
+          notify.success('Senha redefinida com sucesso! Faça login com a nova senha.');
           navigate('/')
         }
-      }).catch(function (error) {
-        console.log(error);
-        alert('Serviço indisponivel, entre em contato.');
+      }).catch((error) => {
+        notifyApiError(error, 'Serviço indisponível. Tente novamente mais tarde.');
       });
     }
   };

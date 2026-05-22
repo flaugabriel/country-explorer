@@ -1,21 +1,21 @@
-cnab-api/.bundle
+api/.bundle
 /.project
-cnab-api/log/*.log
-cnab-api/tmp/**/*
-cnab-api/public/uploads/*
-cnab-api/fig.yml
-cnab-api/public/file_storage/
-cnab-api/public/javascripts/*
-cnab-api/public/storage/*
-cnab-api/public/version
-cnab-client/node_modules
+api/log/*.log
+api/tmp/**/*
+api/public/uploads/*
+api/fig.yml
+api/public/file_storage/
+api/public/javascripts/*
+api/public/storage/*
+api/public/version
+client/node_modules
 node_modules
 coverage
 
-#VScode
+# VS Code
 .vscode/
 
-#Swap file vim
+# Swap file vim
 .*.swp
 
 # RVM gemset name
@@ -23,13 +23,11 @@ coverage
 
 .byebug_history
 
-# Ignore IntelliJ’s project specific settings folder
+# IntelliJ
 .idea/
-./cnab-api/.idea
-./cnab-client/.idea
-./cnab-api/.vscode/
-./cnab-client/.vscode/
+api/.idea
+client/.idea
+api/.vscode/
+client/.vscode/
 
 # Auto generated ERD file
-# vscode
-.vscode

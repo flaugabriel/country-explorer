@@ -3,6 +3,7 @@ import * as C from "./styles";
 import { Link } from "react-router-dom";
 import { showUnlock } from "../../operations/auth";
 import { useLocation } from "react-router-dom";
+import { notify, notifyApiError, formatApiMessage } from "../../utils/notify";
 
 const UnlockShow = () => {
   const location = useLocation();
@@ -12,16 +13,16 @@ const UnlockShow = () => {
   const showUnlockUser = () => {
     showUnlock(unlock_token).then((response) => {
       if (response.data.status === 404) {
-        alert(response.data.errors.toString());
+        notify.error(formatApiMessage(response.data) || 'Não foi possível desbloquear a conta.');
       }else{
-        alert('Perfil liberado!')
+        notify.success('Conta desbloqueada! Você já pode fazer login.');
         setCheck(true)
       }
-    }).catch(function (error) {
-      if (error.response.status === 500) {
-        alert('Erro interno, tente novamente mas tarde.')
+    }).catch((error) => {
+      if (error.response?.status === 500) {
+        notify.error('Erro interno. Tente novamente mais tarde.');
       } else {
-        alert(error.response.data.errors.toString());
+        notifyApiError(error, 'Não foi possível desbloquear a conta.');
       }
     })
   };

@@ -7,6 +7,6 @@ class ApiConstraints
   end
 
   def matches?(req)
-    @default || req.headers['Accept'].include?("application/cnab-api.v#{@version}")
+    @default || req.headers['Accept'].include?("application/country-explorer-api.v#{@version}")
   end
 end

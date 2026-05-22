@@ -4,9 +4,10 @@
 
 O projeto adota uma arquitetura **cliente-servidor desacoplada** (SPA + REST API), onde:
 
-- O **frontend React** é responsável pela interface e estado de sessão local.
-- O **backend Rails** expõe uma API JSON stateless com autenticação via token.
-- O **PostgreSQL** persiste todos os dados de usuário.
+- O **frontend React** gerencia interface e tokens no `localStorage`.
+- O **backend Rails** expõe API JSON stateless com autenticação via Bearer Token (DeviseTokenAuth).
+- O **PostgreSQL** persiste usuários e histórico de buscas.
+- A **REST Countries API** fornece dados de países (com cache e timeout no backend).
 - O **Docker Compose** orquestra todos os serviços.
 
 ---
@@ -19,12 +20,14 @@ graph TD
     API["Rails API\n:3030"]
     DB["PostgreSQL\n:5432"]
     Mail["MailCatcher\n:1080 (SMTP :1025)"]
-    Storage["ActiveStorage\n(armazenamento de blobs)"]
+    Storage["ActiveStorage\n(QR Code PNG)"]
+    ExtAPI["REST Countries API\nrestcountries.com"]
 
     Browser -- "HTTP/JSON + Bearer Token" --> API
     API -- "ActiveRecord" --> DB
     API -- "SMTP" --> Mail
-    API -- "blob (QR Code PNG)" --> Storage
+    API -- "blob temporário" --> Storage
+    API -- "Faraday (cache 1h)" --> ExtAPI
 ```
 
 ---
@@ -52,6 +55,8 @@ graph LR
 | `client` | Dockerfile local (Node) | 3000 |
 | `mailcatcher` | `yappabe/mailcatcher` | 1025 (SMTP), 1080 (UI) |
 
+> O serviço `api` sobe com `RAILS_ENV=production` no Compose local. Veja [getting-started.md](getting-started.md) para implicações.
+
 ---
 
 ## Camadas da Aplicação
@@ -61,41 +66,64 @@ graph LR
 ```
 api/
 ├── app/
-│   ├── controllers/       # Controladores REST
-│   │   ├── api/v1/        # Recursos versionados (namespace :api)
-│   │   └── users/         # Ações Devise estendidas (MFA, Sessions)
-│   ├── models/            # ActiveRecord + Devise modules
-│   ├── services/          # Objetos de serviço (ex: QrcodeCreateService)
-│   ├── mailers/           # ActionMailer (forgot password, lock notification)
-│   └── serializers/       # ActiveModelSerializers (v0.10)
+│   ├── controllers/
+│   │   ├── api/v1/              # countries, search_histories, myaccount
+│   │   ├── users/               # MFA e sessão pós-login
+│   │   ├── password_controller.rb
+│   │   └── unlock_controller.rb
+│   ├── models/                  # User, SearchHistory
+│   ├── services/
+│   │   ├── countries/           # FetcherService, HttpClient, ResponseParser, HistoryPersister
+│   │   └── qrcode_create_service.rb
+│   └── mailers/                 # forgot password, lock notification, update password
 ├── config/
-│   ├── routes.rb          # Roteamento central
-│   └── initializers/      # Devise, DeviseTokenAuth, CORS
+│   ├── routes.rb
+│   └── initializers/            # Devise, DeviseTokenAuth, CORS
 ├── db/
-│   ├── schema.rb          # Estado atual do banco
-│   └── migrate/           # Histórico de migrações
+│   ├── schema.rb
+│   └── migrate/
 └── lib/
-    └── api_constraints.rb # Roteamento por versão via Accept header
+    └── api_constraints.rb       # Versionamento via Accept header
 ```
+
+#### Serviços `Countries::*`
+
+| Classe | Responsabilidade |
+|--------|------------------|
+| `FetcherService` | Orquestra busca, cache (1h), persistência de histórico |
+| `HttpClient` | Chamadas Faraday à REST Countries (timeout 5s, open 3s) |
+| `ResponseParser` | Normaliza payload externo para hash da API |
+| `HistoryPersister` | Grava `SearchHistory` após busca bem-sucedida |
+| `Errors` | `NotFound`, `Timeout`, `ExternalApiError` |
 
 ### Frontend (React SPA)
 
 ```
 client/src/
-├── App.js                 # Ponto de entrada, aplica rotas e estilos globais
-├── routes/index.js        # Definição de rotas (react-router-dom v6)
-├── operations/auth.js     # Todas as chamadas HTTP (axios)
-├── pages/                 # Telas da aplicação
-│   ├── Signin/
-│   ├── Signup/
-│   ├── Home/
-│   ├── ForgotPassword/
-│   ├── UpdatePassword/
+├── App.js
+├── routes/index.js            # Rotas públicas e Private (auth guard)
+├── operations/
+│   ├── auth.js                # Login, MFA, senha, unlock
+│   └── countries.js           # Busca e histórico
+├── pages/
+│   ├── Signin/, Signup/, Home/
+│   ├── Countries/             # Country Explorer (feature principal pós-login)
+│   ├── ForgotPassword/, UpdatePassword/, UnlockShow/
 │   ├── MfaForLogin/
-│   ├── UnlockShow/
-│   └── User/              # Password, MfaSettings
-└── components/            # UI reutilizável (Button, Input, Navbar)
+│   └── User/                  # Password, MfaSettings
+└── components/
+    ├── CountryCard/, SearchInput/, SearchHistoryList/
+    ├── Navbar/, Sidebar/, Button/, Input/
 ```
+
+---
+
+## Versionamento da API
+
+Rotas em `/api/*` usam `ApiConstraints` com header `Accept`:
+
+- **v1 (padrão):** `application/country-explorer-api.v1` ou ausência de versão explícita (default)
+- **v2:** namespace reservado, sem rotas implementadas
 
 ---
 
@@ -103,9 +131,11 @@ client/src/
 
 | Decisão | Justificativa |
 |---------|--------------|
-| Rails em modo API | Elimina overhead de views/assets; responde somente JSON |
-| DeviseTokenAuth | Autenticação stateless via Bearer Token, compatível com SPA |
-| Versionamento de API via Accept header | Permite evolução da API sem quebrar clientes existentes |
-| MFA via TOTP (RFC 6238) | Padrão amplamente suportado por apps autenticadores |
-| ActiveStorage para QR Code | Gera URL temporária do blob sem persistência desnecessária |
-| MailCatcher em dev | Captura e-mails sem envio real durante o desenvolvimento |
+| Rails em modo API | Responde somente JSON, sem views |
+| DeviseTokenAuth | Tokens Bearer compatíveis com SPA |
+| MFA via TOTP (RFC 6238) | Suporte a apps autenticadores |
+| ActiveStorage para QR Code | URL temporária do blob para configuração MFA |
+| Cache de países (1h) | Reduz chamadas à API externa |
+| Histórico por usuário | Rastreia buscas recentes na UI |
+| MailCatcher em dev | Captura e-mails sem SMTP real |
+| Serviços injetáveis em `FetcherService` | Facilita testes com doubles (WebMock) |

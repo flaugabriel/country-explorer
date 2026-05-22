@@ -17,6 +17,13 @@ RSpec.describe Countries::HistoryPersister do
         persister.call('brazil')
         expect(user.search_histories.last.country_name).to eq('Brazil')
       end
+
+      it 'touches an existing history instead of creating a duplicate' do
+        existing = user.search_histories.create!(country_name: 'Brazil')
+
+        expect { persister.call('brazil') }.not_to change(SearchHistory, :count)
+        expect(existing.reload.updated_at).to be >= existing.created_at
+      end
     end
 
     context 'when the record is invalid (country_name blank after capitalize)' do

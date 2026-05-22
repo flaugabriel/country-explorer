@@ -1,5 +1,5 @@
 {
-  "name": "cnab-client",
+  "name": "country-explorer-client",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

@@ -18,13 +18,13 @@ RSpec.describe ApiConstraints do
 
       it 'matches when the Accept header includes the versioned media type' do
         request = instance_double(ActionDispatch::Request,
-          headers: { 'Accept' => 'application/cnab-api.v1' })
+          headers: { 'Accept' => 'application/country-explorer-api.v1' })
         expect(constraint.matches?(request)).to be true
       end
 
       it 'does not match when the Accept header is for a different version' do
         request = instance_double(ActionDispatch::Request,
-          headers: { 'Accept' => 'application/cnab-api.v2' })
+          headers: { 'Accept' => 'application/country-explorer-api.v2' })
         expect(constraint.matches?(request)).to be false
       end
 

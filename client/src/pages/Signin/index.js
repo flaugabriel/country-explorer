@@ -4,6 +4,7 @@ import Button from "../../components/Button";
 import * as C from "./styles";
 import { Link, useNavigate } from "react-router-dom";
 import { signin } from '../../operations/auth';
+import { notify, notifyApiError, formatApiMessage } from '../../utils/notify';
 
 const Signin = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Signin = () => {
     }else{
       signin(email, senha).then((response) => {
         if (response.data.status === 404) {
-          alert(response.data.errors.toString());
+          notify.error(formatApiMessage(response.data) || 'Credenciais inválidas.');
         }else{
           localStorage.removeItem("authorization");
           localStorage.setItem("authorization", response.headers['authorization']);
@@ -28,11 +29,11 @@ const Signin = () => {
             setSigned(true)
           }
         }
-      }).catch(function (error) {
-        if (error.response.status === 500) {
-          alert('Erro interno, tente novamente mas tarde.')
+      }).catch((error) => {
+        if (error.response?.status === 500) {
+          notify.error('Erro interno. Tente novamente mais tarde.');
         } else {
-          alert(error.response.data.errors.toString());
+          notifyApiError(error, 'Não foi possível entrar. Verifique e-mail e senha.');
         }
       });
     }

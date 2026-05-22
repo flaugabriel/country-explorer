@@ -1,8 +1,8 @@
-# Access Security
+# Country Explorer
 
-Sistema de autenticação segura full-stack com suporte a MFA/TOTP, bloqueio por tentativas, recuperação de senha e expiração de sessão.
+Aplicação full-stack que combina **autenticação segura** (MFA/TOTP, bloqueio por tentativas, recuperação de senha) com **exploração de países** via REST Countries API.
 
-> 📚 **Documentação técnica completa:** [ia/docs/README.md](ia/docs/README.md)
+> Documentação técnica: [ia/docs/README.md](ia/docs/README.md)
 
 ---
 
@@ -10,9 +10,12 @@ Sistema de autenticação segura full-stack com suporte a MFA/TOTP, bloqueio por
 
 | Seção | Link |
 |-------|------|
-| Arquitetura & visão geral | [ia/docs/README.md](ia/docs/README.md) |
+| Visão geral | [ia/docs/overview.md](ia/docs/overview.md) |
+| Setup | [ia/docs/getting-started.md](ia/docs/getting-started.md) |
 | Banco de dados | [ia/docs/database.md](ia/docs/database.md) |
 | Endpoints da API | [ia/docs/endpoints.md](ia/docs/endpoints.md) |
+| Autenticação & segurança | [ia/docs/authentication.md](ia/docs/authentication.md) |
+| Frontend | [ia/docs/frontend.md](ia/docs/frontend.md) |
 
 ---
 
@@ -20,38 +23,29 @@ Sistema de autenticação segura full-stack com suporte a MFA/TOTP, bloqueio por
 
 - Docker e Docker Compose instalados
 
-> **Atenção:** dependendo da versão do Docker Compose, o comando pode ser `docker-compose` (v1) ou `docker compose` (v2). Este projeto usa `docker compose`.
+> O comando pode ser `docker-compose` (v1) ou `docker compose` (v2). Este projeto usa `docker compose`.
 
 ## Setup
 
-Na raiz do projeto, execute os comandos abaixo em ordem:
-
 ```shell
-# 1. Builda as imagens e sobe os containers
 docker compose up --build -d
-
-# 2. Configura o banco de dados
 docker compose run --rm api rails db:drop db:create db:migrate
 ```
 
 Acesse:
+
 - **Frontend:** http://localhost:3000
-- **API (status):** http://localhost:3030
-- **Mailcatcher (emails de teste):** http://localhost:1080
-  - Todos os emails enviados em desenvolvimento (ex: recuperação de senha) podem ser visualizados acessando esse endereço no navegador.
+- **API:** http://localhost:3030
+- **MailCatcher:** http://localhost:1080
 
 ## Testes
 
 ```shell
-docker compose run --rm api rspec
+docker compose run --rm -e RAILS_ENV=test api bundle exec rspec
 ```
 
-## Cobertura de código (SimpleCov)
-
-Após rodar os testes, abra `api/coverage/index.html` no navegador para visualizar o relatório de cobertura.
+Cobertura: `api/coverage/index.html` após rodar os testes.
 
 ---
 
-> Para detalhes de endpoints, contratos JSON e fluxos de autenticação, consulte a [documentação técnica](ia/docs/README.md). 🚀
-
-
+Para contratos JSON, fluxos de MFA e endpoints de países, consulte a [documentação em ia/docs](ia/docs/README.md).

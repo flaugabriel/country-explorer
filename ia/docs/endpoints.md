@@ -181,10 +181,11 @@ POST /users/disable_multi_factor_authentication
 **Body:**
 ```json
 {
-  "id": 1,
-  "otp_code_token": "123456"
+  "id": 1
 }
 ```
+
+> **Comportamento atual:** o endpoint **não valida** `otp_code_token` — desativa o MFA imediatamente para o usuário autenticado. O frontend ainda envia o token por compatibilidade. Veja [authentication.md](authentication.md).
 
 **Resposta 200:**
 ```json
@@ -279,13 +280,87 @@ POST /password/reset
 ## Desbloqueio de Conta
 
 ```
-GET /unlock/show?unlock_token=<email>
+GET /unlock/show?unlock_token=<email_do_usuario>
 ```
+
+> O parâmetro se chama `unlock_token`, mas a implementação busca o usuário pelo **e-mail** (`User.find_by(email: params[:unlock_token])`). Veja ressalvas em [authentication.md](authentication.md).
 
 **Resposta 200:**
 ```json
 { "status": "ok" }
 ```
+
+---
+
+## Country Explorer (requer autenticação)
+
+> Header: `Authorization: Bearer <token>`
+
+### Buscar país
+
+```
+GET /api/countries/:name
+```
+
+`:name` é o termo de busca (ex.: `brazil`, `portugal`). A API consulta REST Countries em `/v3.1/name/{name}` com campos reduzidos.
+
+**Resposta 200:**
+```json
+{
+  "data": {
+    "name": "Brazil",
+    "official_name": "Federative Republic of Brazil",
+    "flag": "https://flagcdn.com/w320/br.png",
+    "flag_alt": "The flag of Brazil...",
+    "capital": "Brasília",
+    "population": 212559409,
+    "currencies": ["Brazilian real (BRL)"],
+    "languages": ["Portuguese"],
+    "continent": "South America",
+    "timezones": ["UTC-05:00", "UTC-04:00", "UTC-03:00", "UTC-02:00"]
+  }
+}
+```
+
+**Resposta 404:**
+```json
+{ "error": "Country not found" }
+```
+
+**Resposta 503** (timeout ou indisponibilidade externa):
+```json
+{ "error": "External service unavailable, please try again later" }
+```
+
+**Resposta 500:**
+```json
+{ "error": "Unexpected error" }
+```
+
+> Respostas bem-sucedidas são cacheadas por **1 hora** (`Rails.cache`). Um registro em `search_histories` é criado após cada busca com sucesso.
+
+---
+
+### Histórico de buscas
+
+```
+GET /api/search_histories
+```
+
+**Resposta 200:**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "country_name": "Brazil",
+      "created_at": "2023-07-12T15:30:00.000Z"
+    }
+  ]
+}
+```
+
+Retorna até **20** países distintos (mais recentes primeiro), deduplicados por nome.
 
 ---
 
@@ -305,3 +380,5 @@ GET /unlock/show?unlock_token=<email>
 | POST | `/password/forgot` | Não | Solicitar reset de senha |
 | POST | `/password/reset` | Não | Redefinir senha via token |
 | GET | `/unlock/show` | Não | Desbloquear conta |
+| GET | `/api/countries/:name` | Sim | Buscar país (REST Countries) |
+| GET | `/api/search_histories` | Sim | Histórico de buscas do usuário |

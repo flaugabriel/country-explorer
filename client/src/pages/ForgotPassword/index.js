@@ -3,6 +3,7 @@ import * as C from "./styles";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { forgotPassword } from "../../operations/auth";
+import { notify, notifyApiError, formatApiMessage } from "../../utils/notify";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -14,13 +15,12 @@ const ForgotPassword = () => {
     }else{
       forgotPassword(email).then((response) => {
         if (response.data.status === 404) {
-          alert(response.data.errors.toString());
+          notify.error(formatApiMessage(response.data) || 'E-mail não encontrado.');
         }else{
-          alert(`Verifique sua conta de email ${email}`)
+          notify.success(`Enviamos um link de recuperação para ${email}.`);
         }
-      }).catch(function (error) {
-        console.log(error);
-        alert('Serviço indisponivel, entre em contato.');
+      }).catch((error) => {
+        notifyApiError(error, 'Serviço indisponível. Tente novamente mais tarde.');
       });
     }
   };

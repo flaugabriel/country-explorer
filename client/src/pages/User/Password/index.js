@@ -4,6 +4,7 @@ import Input from "../../../components/Input";
 import Button from "../../../components/Button";
 import { passwordUpdate } from "../../../operations/auth";
 import { useNavigate } from "react-router-dom";
+import { notify, notifyApiError } from "../../../utils/notify";
 
 const Password = () => {
   const navigate = useNavigate();
@@ -20,14 +21,13 @@ const Password = () => {
       event.preventDefault();
       passwordUpdate(authorization, password, password_confirmation).then((response) => {
         if (response.data.status === 404) {
-          console.log(response.data.errors[0]);
+          notify.error(response.data.errors?.[0] || 'Não foi possível atualizar a senha.');
         } else {
-          alert(response.data.message)
+          notify.success(response.data.message || 'Senha atualizada! Faça login novamente.');
           navigate('/')
         }
-      }).catch(function (error) {
-        console.log(error);
-        alert( error.response.data.error)
+      }).catch((error) => {
+        notifyApiError(error, 'Não foi possível atualizar a senha.');
       });
     }
   };

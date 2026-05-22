@@ -4,6 +4,7 @@ import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { signinMfa } from "../../operations/auth";
 import { useNavigate } from "react-router-dom";
+import { notify, notifyApiError, formatApiMessage } from '../../utils/notify';
 
 const MfaForLogin = () => {
   const navigate = useNavigate();
@@ -18,21 +19,21 @@ const MfaForLogin = () => {
     }else{
       signinMfa(email, authorization, token).then((response) => {
         if (response.data.status === 404) {
-          alert(response.data.errors.toString());
+          notify.error(formatApiMessage(response.data) || 'Token não informado.');
         }else{
           if (response.data) {
             localStorage.setItem("mfa", true);
-            alert('Bem vindo!')  
+            notify.success('Bem-vindo!');
             navigate('/home')
           }else{
-            alert('Token invalido!')
+            notify.error('Token inválido.');
           }
         }
-      }).catch(function (error) {
-        if (error.response.status === 500) {
-          alert('Erro interno, tente novamente mas tarde.')
+      }).catch((error) => {
+        if (error.response?.status === 500) {
+          notify.error('Erro interno. Tente novamente mais tarde.');
         } else {
-          alert(error.response.data.messager);
+          notifyApiError(error, 'Credenciais inválidas.');
         }
       });
     }

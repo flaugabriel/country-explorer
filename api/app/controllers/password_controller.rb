@@ -29,9 +29,7 @@ class PasswordController < ApplicationController
       if user.reset_password!(params[:password])
         render json: {status: 'ok'}, status: :ok
       else
-        # :nocov:
         render json: {error: user.errors.full_messages}, status: :unprocessable_entity
-        # :nocov:
       end
     else
       render json: {error:  'Link not valid or expired. Try generating a new link.'}, status: :not_found

@@ -28,5 +28,24 @@ RSpec.describe 'UnlockController', type: :request do
         expect(response).to have_http_status(:ok)
       end
     end
+
+    context 'when unlock_access! leaves errors on the user' do
+      let(:errors) do
+        ActiveModel::Errors.new(user).tap { |e| e.add(:base, 'cannot unlock') }
+      end
+
+      before do
+        allow(User).to receive(:find_by).and_return(user)
+        allow(user).to receive(:unlock_access!)
+        allow(user).to receive(:errors).and_return(errors)
+      end
+
+      it 'returns 422 with errors' do
+        get '/unlock/show', params: { unlock_token: user.email }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json['erorrs']).to be_present
+      end
+    end
   end
 end

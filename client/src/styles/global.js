@@ -14,6 +14,10 @@ const GlobalStyle = createGlobalStyle`
     background-color: #f0f2f5;
     font-family: Arial, Helvetica, sans-serif
   }
+
+  .Toastify__toast-container {
+    z-index: 9999;
+  }
 `;
 
 export default GlobalStyle;
