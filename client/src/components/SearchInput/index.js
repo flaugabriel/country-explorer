@@ -14,7 +14,7 @@ const SearchInput = ({ onSearch, loading }) => {
       <input
         type="text"
         className="form-control form-control-lg"
-        placeholder="Digite o nome do país em inglês..."
+        placeholder="Digite o nome do país em português ou inglês"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         disabled={loading}
