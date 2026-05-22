@@ -3,6 +3,8 @@
 require 'api_constraints'
 
 Rails.application.routes.draw do
+  root to: 'status#index'
+
   devise_for :users
   resource :users do 
     member do

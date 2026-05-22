@@ -31,7 +31,7 @@ module CnabApi
     config.paths.add(Rails.root.join('lib').to_s, eager_load: true)
     config.autoload_paths += %W[#{config.root}/lib]
     config.api_only = true
-    I18n.default_locale = 'pt-BR'
+    config.i18n.default_locale = :'pt-BR'
     config.session_store :cookie_store, key: '_interslice_session'
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use config.session_store, config.session_options

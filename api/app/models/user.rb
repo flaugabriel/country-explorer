@@ -17,8 +17,8 @@ class User < ActiveRecord::Base
   after_update :check_if_user_is_locker
 
   validates :password, format: {
-    with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).{12,32}\z/,
-    message: "deve ter entre 12 e 32 caracteres, pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial"
+    with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).{6,32}\z/,
+    message: "deve ter entre 6 e 32 caracteres, pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial"
   }, on: :create
 
   def generate_password_token!

@@ -1,190 +1,57 @@
-## INFORMAÇÃO/INSTALAÇÃO
+# Access Security
 
-Este projeto tem como finalidade de desenvolver mecanismo de acesso, dentre esses mecanismos estão em destaque:
+Sistema de autenticação segura full-stack com suporte a MFA/TOTP, bloqueio por tentativas, recuperação de senha e expiração de sessão.
 
-* Senha segura.
-* Expiração de sessão.
-* Bloqueio por limite máximo de tentativas de login.
-* proteção via captcha. 
-* duplo fator de autenticação.
+> 📚 **Documentação técnica completa:** [ia/docs/README.md](ia/docs/README.md)
 
-Tecnologias utilizadas:
-* Ruby 3.2.1
-* Rails 7.0.4.3 (api)
-* React 18.2.0
-* PostgreSQL Stable
-* Docker 24.0.0 /Compose 1.29.2
+---
 
-## Preparação de como configura este projeto ? 🔨
-OBS: Para os requisitos nescessario para executa esse projeto é preciso do docker/docker-compose.  Dependendo da versão que está instalado em seu equipamento o comando de ação muda versões mais antigas 2022 estão operando com a sintaxe
-```docker-compose ```a mais atual é ```docker compose ```. 
-No caso deste projeto foi utilizado o comando compose da forma antiga na versão 1.29.2
+## Índice rápido
 
-## Setup 
-Na raiz do projeto acess_security_ror execute:
-Para instala e configura as imagens e containers 
+| Seção | Link |
+|-------|------|
+| Arquitetura & visão geral | [ia/docs/README.md](ia/docs/README.md) |
+| Banco de dados | [ia/docs/database.md](ia/docs/database.md) |
+| Endpoints da API | [ia/docs/endpoints.md](ia/docs/endpoints.md) |
 
-```shell
-docker-compose build
-```
-Levanta os serviços
+---
+
+## Pré-requisitos
+
+- Docker e Docker Compose instalados
+
+> **Atenção:** dependendo da versão do Docker Compose, o comando pode ser `docker-compose` (v1) ou `docker compose` (v2). Este projeto usa `docker compose`.
+
+## Setup
+
+Na raiz do projeto, execute os comandos abaixo em ordem:
 
 ```shell
-docker-compose up
+# 1. Builda as imagens e sobe os containers
+docker compose up --build -d
+
+# 2. Configura o banco de dados
+docker compose run --rm api rails db:drop db:create db:migrate
 ```
-Configurando o banco de dados
+
+Acesse:
+- **Frontend:** http://localhost:3000
+- **API (status):** http://localhost:3030
+- **Mailcatcher (emails de teste):** http://localhost:1080
+  - Todos os emails enviados em desenvolvimento (ex: recuperação de senha) podem ser visualizados acessando esse endereço no navegador.
+
+## Testes
 
 ```shell
-docker-compose run --rm api rails db:drop db:create db:migrate
-```
-Acesse [localhost:3000](localhost:3000) Para visualiza a ir a de login ou Realize um Cadastro usando esse link http://localhost:3000/signup
-
-## Consumindo os endpoint da API
-Nota: esta api se encontra preparada para versionamento. (plus)
-### Rotas Auth
-
-* POST http://localhost:3030/api/auth/sign_in (LOGIN)
-
-* POST http://localhost:3030/api/v1/sign_up (CADASTRO DE USUÁRIO)
-
-### Rotas users
-
-* GET http://localhost:3030/api/myaccount/mfa (PERFIL DO USUPARIO/SESSÃO)
-
-* POST http://localhost:3030/api/myaccount/token (ATUALIZA O DO USUARIO)(PLUS)
-
-### Autenticação (plus)
-* Após o login e necessário envia via headers o 
-Authorization: Bearer <your_token>
-
-#### login:
-```POST localhost:3030/api/auth/sign_in```
-```json
-{
-	"email": "test@gmail.com",
-	"password": "12345678"
-}
-```
-resposta:
-```json
-{
-	"data": {
-		"email": "test@test.com",
-		"provider": "email",
-		"uid": "test@test.com",
-		"id": 2,
-		"allow_password_change": false
-	}
-}
-```
-#### Cadastro:
-```POST localhost:3030/api/auth```
-```json
-{
-  "email": "test@gmail.com",
-  "password": "12345678",
-  "password_confirmation": "12345678"
-}
-```
-resposta:
-```json
-{
-	"status": "success",
-	"data": {
-		"id": 1,
-		"provider": "email",
-		"uid": "test@gmail.com",
-		"allow_password_change": false,
-		"email": "test@gmail.com",
-		"created_at": "2023-05-22T10:48:54.580-04:00",
-		"updated_at": "2023-05-22T10:48:54.639-04:00"
-	}
-}
-```
-### User
-#### atualiza perfil (senha, confirmação)
-```PUT localhost:3030/api/myaccount/profile```
-```json
-{
-  "password": "12345678",
-  "password_confirmation": "12345678"
-}
-```
-resposta:
-```json
-{
-	"message": "Senha atualizado."
-}
-```
-#### consulta perfil/session
-```GET localhost:3030/api/myaccount/profile```
-```json
-{
-  "email": "test@gmail.com",
-  "password": "12345678",
-  "password_confirmation": "12345678"
-}
-```
-resposta:
-```json
-{
-	"data": {
-		"id": 1,
-		"provider": "email",
-		"uid": "test@gmail.com",
-		"allow_password_change": false,
-		"email": "test@gmail.com",
-		"created_at": "2023-05-22T10:48:54.580-04:00",
-		"updated_at": "2023-05-22T10:49:16.968-04:00"
-	}
-}
-```
-#### Esqueceu sua senha
-```POST localhost:3030/password/forgot```
-```json
-{
-  "email": "flaugabriel@gmail.com"
-}
-```
-resposta:
-```json
-{
-	"status": "ok"
-}
-```
-#### Recupere sua senha
-```POST localhost:3030/password/reset```
-
-```json
-{
-  "email": "flaugabriel@gmail.com",
-  "token": "05b0b53d881660c62ae1",
-  "password": "Gabrielwga28201945"
-}
-```
-resposta
-```json 
-{
- 	"status": "ok"
-}
-```
-#### Recupere sua conta 
-```POST localhost:3030/unlock/show?unlock_token=<token>```
-
-params: token é verifique no email o token
-resposta:
-```json
-{
-	"messager": "Conta desbloqueada"
-}
-```
-## Testes 
-
-Executando todos os testes
-```shell
-docker-compose run --rm api rspec
+docker compose run --rm api rspec
 ```
 
-## Cobertura de codigos (SimpleCov)
-Após compila os testes abra este arquivo ```api/coverage/index.html``` no navegador para visualizar a cobertura de testes.
-### Fim Obrigado! :D 🚀
+## Cobertura de código (SimpleCov)
+
+Após rodar os testes, abra `api/coverage/index.html` no navegador para visualizar o relatório de cobertura.
+
+---
+
+> Para detalhes de endpoints, contratos JSON e fluxos de autenticação, consulte a [documentação técnica](ia/docs/README.md). 🚀
+
+

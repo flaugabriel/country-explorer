@@ -9,7 +9,13 @@ module Countries
     end
 
     def call(country_name)
-      @user.search_histories.create!(country_name: country_name.capitalize)
+      name = country_name.capitalize
+      existing = @user.search_histories.find_by(country_name: name)
+      if existing
+        existing.touch
+      else
+        @user.search_histories.create!(country_name: name)
+      end
     rescue ActiveRecord::RecordInvalid
       nil
     end
