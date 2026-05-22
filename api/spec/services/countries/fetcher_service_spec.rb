@@ -46,6 +46,48 @@ RSpec.describe Countries::FetcherService do
   end
 
   describe '#call' do
+    context 'when searching by ccn3 code' do
+      let(:service_by_code) do
+        described_class.new(
+          user: user,
+          country_code: '076',
+          http_client: http_client,
+          parser: parser,
+          persister: persister
+        )
+      end
+
+      it 'uses the alpha endpoint and parses the first country from array payload' do
+        response = instance_double(Faraday::Response, status: 200, success?: true, body: raw_payload)
+        allow(http_client).to receive(:get).and_return(response)
+        Rails.cache.clear
+
+        result = service_by_code.call
+
+        expect(result[:name]).to eq('Brazil')
+        expect(http_client).to have_received(:get).with(
+          '/v3.1/alpha/076',
+          { fields: Countries::ResponseParser::FIELDS }
+        )
+      end
+
+      it 'raises not found for 404 responses' do
+        response = instance_double(Faraday::Response, status: 404, success?: false, body: '{}')
+        allow(http_client).to receive(:get).and_return(response)
+        Rails.cache.clear
+
+        expect { service_by_code.call }.to raise_error(Countries::Errors::NotFound)
+      end
+
+      it 'raises external api error for non-success responses' do
+        response = instance_double(Faraday::Response, status: 500, success?: false, body: '{}')
+        allow(http_client).to receive(:get).and_return(response)
+        Rails.cache.clear
+
+        expect { service_by_code.call }.to raise_error(Countries::Errors::ExternalApiError)
+      end
+    end
+
     context 'when the external API returns a valid response' do
       let(:response) { instance_double(Faraday::Response, status: 200, success?: true, body: raw_payload) }
 
@@ -73,6 +115,24 @@ RSpec.describe Countries::FetcherService do
         service.call
         service.call
         expect(http_client).to have_received(:get).once
+      end
+
+      it 'parses payloads returned as a single object (non-array)' do
+        raw_object_payload = {
+          'name'        => { 'common' => 'Brazil', 'official' => 'Federative Republic of Brazil' },
+          'flags'       => { 'png' => 'https://flagcdn.com/br.png', 'alt' => 'Flag of Brazil' },
+          'capital'     => ['Brasília'],
+          'population'  => 214_000_000,
+          'currencies'  => { 'BRL' => { 'name' => 'Brazilian real', 'symbol' => 'R$' } },
+          'languages'   => { 'por' => 'Portuguese' },
+          'continents'  => ['South America'],
+          'timezones'   => ['UTC-03:00'],
+        }.to_json
+        object_response = instance_double(Faraday::Response, status: 200, success?: true, body: raw_object_payload)
+        allow(http_client).to receive(:get).and_return(object_response)
+        Rails.cache.clear
+
+        expect(service.call[:name]).to eq('Brazil')
       end
     end
 

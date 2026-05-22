@@ -11,6 +11,20 @@ describe Api::V1::CountriesController, type: :controller do
   end
 
   describe 'GET #show' do
+    context 'with country_code param (ccn3)' do
+      it 'routes the request and returns success' do
+        fetcher = instance_double(Countries::FetcherService, call: { name: 'Brazil', ccn3: '076' })
+        expect(Countries::FetcherService).to receive(:new).with(
+          user: user,
+          country_code: '076'
+        ).and_return(fetcher)
+
+        get :show, params: { name: '076' }
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)['data']['ccn3']).to eq('076')
+      end
+    end
+
     context 'with country_name param' do
       it 'returns success and country data' do
         allow_any_instance_of(Countries::FetcherService).to receive(:call).and_return({ name: 'Brazil', cca2: 'BR' })
@@ -42,6 +56,14 @@ describe Api::V1::CountriesController, type: :controller do
         allow_any_instance_of(Countries::FetcherService).to receive(:call).and_raise(Countries::Errors::Timeout)
         get :show, params: { name: 'Brazil' }
         expect(response).to have_http_status(:service_unavailable)
+      end
+    end
+
+    context 'when external API returns an unexpected upstream error' do
+      it 'returns 500' do
+        allow_any_instance_of(Countries::FetcherService).to receive(:call).and_raise(Countries::Errors::ExternalApiError)
+        get :show, params: { name: 'Brazil' }
+        expect(response).to have_http_status(:internal_server_error)
       end
     end
 

@@ -7,7 +7,7 @@ module Api
         begin
           Rails.logger.info "[CountriesController] Param recebido: \\#{params[:name]}"
           param = params[:name]
-          if param.match?(/^\\d{3}$/)
+          if param.match?(/^\d{3}$/)
             Rails.logger.info "[CountriesController] Buscando por ccn3: \\#{param}"
             result = Countries::FetcherService.new(
               user: current_user,
