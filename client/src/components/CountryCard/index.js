@@ -1,7 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CountryCard = ({ country }) => {
+  const navigate = useNavigate();
   if (!country) return null;
+
+  const handleClick = () => {
+    if (country.name) {
+      navigate(`/countries/${encodeURIComponent(country.name)}`);
+    }
+  };
 
   return (
     <div className="card shadow-sm mt-4">
@@ -15,7 +23,9 @@ const CountryCard = ({ country }) => {
             />
           )}
           <div>
-            <h4 className="mb-0">{country.name}</h4>
+            <h4 className="mb-0" style={{ cursor: 'pointer', color: '#046ee5', textDecoration: 'underline' }} onClick={handleClick} title="Ver detalhes">
+              {country.name}
+            </h4>
             {country.official_name && country.official_name !== country.name && (
               <small className="text-muted">{country.official_name}</small>
             )}
