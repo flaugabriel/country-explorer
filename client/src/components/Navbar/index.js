@@ -15,6 +15,7 @@ const Navbar = () => {
 
             <form className="d-flex">
               <a className="navbar-brand" href="/home">Home</a>
+              <a className="navbar-brand" href="/countries">Countries</a>
               <a className="navbar-brand" href="/password">Senha</a>
               <a className="navbar-brand" href="/settings/mfa">MFA</a>
             </form>

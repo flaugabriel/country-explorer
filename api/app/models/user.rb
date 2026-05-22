@@ -5,6 +5,8 @@ class User < ActiveRecord::Base
   :rememberable, :validatable, :trackable, :two_factor_authenticatable
   include DeviseTokenAuth::Concerns::User
   
+  has_many :search_histories, dependent: :destroy
+
   has_one_time_password
   enum otp_module: { disabled: 0, enabled: 1}, _prefix: true
   attr_accessor :otp_code_token
@@ -32,6 +34,7 @@ class User < ActiveRecord::Base
   def reset_password!(password)
    self.reset_password_token = nil
    self.password = password
+   self.password_confirmation = password
    save!
   end
    

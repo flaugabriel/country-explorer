@@ -1,0 +1,199 @@
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 3.0
+  NewCops: enable
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/**/*'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'config/boot.rb'
+    - 'config/environment.rb'
+
+# ──────────────────────────────────────────
+# Layout
+# ──────────────────────────────────────────
+Layout/LineLength:
+  Max: 120
+  AllowedPatterns:
+    - '\A\s*#'   # allow long comments
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: table
+  EnforcedColonStyle: table
+
+Layout/SpaceAroundOperators:
+  Enabled: true
+
+Layout/EmptyLinesAroundClassBody:
+  Enabled: true
+
+# ──────────────────────────────────────────
+# Style
+# ──────────────────────────────────────────
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+  Exclude:
+    - 'spec/**/*'
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: single_quotes
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: no_comma
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19
+
+Style/SymbolArray:
+  EnforcedStyle: percent
+
+Style/WordArray:
+  EnforcedStyle: percent
+
+Style/GuardClause:
+  Enabled: true
+
+Style/NegatedIf:
+  EnforcedStyle: postfix
+
+Style/ConditionalAssignment:
+  Enabled: true
+
+# ──────────────────────────────────────────
+# Naming
+# ──────────────────────────────────────────
+Naming/VariableNumber:
+  Enabled: false
+
+Naming/MethodParameterName:
+  MinNameLength: 2
+
+# ──────────────────────────────────────────
+# Metrics
+# ──────────────────────────────────────────
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/ModuleLength:
+  Max: 150
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'config/**/*'
+  AllowedMethods:
+    - describe
+    - context
+    - it
+    - shared_examples_for
+    - shared_context
+
+Metrics/AbcSize:
+  Max: 22
+
+Metrics/CyclomaticComplexity:
+  Max: 8
+
+Metrics/PerceivedComplexity:
+  Max: 8
+
+# ──────────────────────────────────────────
+# Rails
+# ──────────────────────────────────────────
+Rails/Output:
+  Enabled: true
+
+Rails/SkipsModelValidations:
+  Enabled: false
+
+Rails/FilePath:
+  Enabled: false
+
+Rails/DynamicFindBy:
+  Enabled: true
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: true
+
+Rails/InverseOf:
+  Enabled: true
+
+# ──────────────────────────────────────────
+# RSpec
+# ──────────────────────────────────────────
+RSpec/MultipleExpectations:
+  Max: 6
+
+RSpec/ExampleLength:
+  Max: 40
+
+RSpec/NestedGroups:
+  Max: 4
+
+RSpec/MessageSpies:
+  Enabled: false
+
+RSpec/AnyInstance:
+  Enabled: false
+
+RSpec/LetSetup:
+  Enabled: false
+
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - and
+    - given
+    - if
+
+RSpec/FilePath:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/request/**/*'
+
+# ──────────────────────────────────────────
+# Performance
+# ──────────────────────────────────────────
+Performance/CollectionLiteralInLoop:
+  Enabled: true
+
+Performance/Count:
+  Enabled: true
+
+Performance/Detect:
+  Enabled: true
+
+Performance/FlatMap:
+  Enabled: true
+
+Performance/MapCompact:
+  Enabled: true

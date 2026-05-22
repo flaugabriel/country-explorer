@@ -13,9 +13,32 @@
 # it.
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
-require "shoulda/matchers"
+
 require 'simplecov'
-SimpleCov.start
+
+SimpleCov.start 'rails' do
+  minimum_coverage 100
+
+  # ── Filtros ──────────────────────────────────────────────────────────────
+  add_filter '/spec/'
+  add_filter '/vendor/'
+  add_filter 'app/channels/'
+  add_filter 'app/jobs/'
+  add_filter 'app/mailers/application_mailer.rb'
+  add_filter 'app/models/application_record.rb'
+  add_filter 'app/models/concerns/'
+  add_filter 'app/controllers/concerns/'
+
+  # ── Grupos ───────────────────────────────────────────────────────────────
+  add_group 'Controllers',  'app/controllers'
+  add_group 'Models',       'app/models'
+  add_group 'Services',     'app/services'
+  add_group 'Serializers',  'serializers'
+  add_group 'Mailers',      'app/mailers'
+  add_group 'Libraries',    'lib'
+end
+
+require 'shoulda/matchers'
 RSpec.configure do |config|
 
   # rodando de forma aleatório

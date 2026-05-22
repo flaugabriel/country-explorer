@@ -19,9 +19,12 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
     mount_devise_token_auth_for 'User', at: 'auth'
     scope module: :v1, constraints: ApiConstraints.new(version: 1, default: true) do
-      get '/myaccount/profile', to: 'myaccount#profile'
-      put '/myaccount/profile', to: 'myaccount#update', as: 'my_account_profile_update'
+      get '/myaccount/profile',       to: 'myaccount#profile'
+      put '/myaccount/profile',       to: 'myaccount#update', as: 'my_account_profile_update'
       get '/myaccount/open_qrcode_mfa', to: 'myaccount#open_qrcode_mfa'
+
+      get '/countries/:name',         to: 'countries#show'
+      get '/search_histories',        to: 'search_histories#index'
     end
 
     # for another features

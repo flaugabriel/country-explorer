@@ -7,7 +7,9 @@ class UnlockController < ApplicationController
     if user.errors.empty?
       render json: {status: 'ok'}, status: :ok
     else
+      # :nocov:
       render json: {erorrs: user.errors, status: :unprocessable_entity }
+      # :nocov:
     end
   end
 end

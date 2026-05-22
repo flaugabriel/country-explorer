@@ -11,6 +11,7 @@ import MfaSettings from "../pages/User/MfaSettings";
 import ForgotPassword from "../pages/ForgotPassword";
 import UpdatePassword from "../pages/UpdatePassword";
 import UnlockShow from "../pages/UnlockShow";
+import Countries from "../pages/Countries";
 import { useNavigate } from "react-router-dom";
 
 const Private = ({ Item }) => {
@@ -62,6 +63,7 @@ const RoutesApp = () => {
       <Fragment>
         <Routes>
           <Route exact path="/home" element={<Private Item={Home} />} />
+          <Route exact path="/countries" element={<Private Item={Countries} />} />
           <Route exact path="/password" element={<Private Item={Password} />} />
           <Route exact path="/settings/mfa" element={<Private Item={MfaSettings} />} />
           <Route path="/mfa" element={<MfaForLogin />} />

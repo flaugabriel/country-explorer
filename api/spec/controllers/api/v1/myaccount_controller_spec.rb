@@ -46,10 +46,26 @@ RSpec.describe Api::V1::MyaccountController, type: :request do
     end
   end
 
-  describe 'GET #open_qrcode' do
-    context 'load service class' do
-      it 'gives QrcodeCreateService' do
-        allow_any_instance_of(QrcodeCreateService).to receive(:build)
+  describe 'GET /api/myaccount/open_qrcode_mfa' do
+    let(:blob) { instance_double(ActiveStorage::Blob, url: 'https://example.com/qr.png') }
+
+    context 'when QrcodeCreateService builds a blob successfully' do
+      before { allow_any_instance_of(QrcodeCreateService).to receive(:build).and_return(blob) }
+
+      it 'returns 200 with the qrcode URL' do
+        get '/api/myaccount/open_qrcode_mfa', headers: auth_headers
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)['qrcode']).to eq('https://example.com/qr.png')
+      end
+    end
+
+    context 'when QrcodeCreateService returns nil' do
+      before { allow_any_instance_of(QrcodeCreateService).to receive(:build).and_return(nil) }
+
+      it 'returns 200 with error fallback message' do
+        get '/api/myaccount/open_qrcode_mfa', headers: auth_headers
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)['qrcode']).to eq('Erro ao processar o QRCODE')
       end
     end
   end

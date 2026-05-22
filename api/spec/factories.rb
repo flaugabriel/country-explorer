@@ -6,4 +6,9 @@ FactoryBot.define do
     password { 'GN&03i4686#A' }
     password_confirmation { 'GN&03i4686#A' }
   end
+
+  factory :search_history do
+    association :user
+    country_name { Faker::Address.country }
+  end
 end

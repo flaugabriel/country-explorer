@@ -32,6 +32,9 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 
+require 'webmock/rspec'
+WebMock.disable_net_connect!(allow_localhost: true)
+
 RSpec.configure do |config|
   #shoulda-matchers
   Shoulda::Matchers.configure do |config|
@@ -44,6 +47,7 @@ RSpec.configure do |config|
   # devise
   config.include Devise::Test::ControllerHelpers, :type => :controller
   config.include FactoryBot::Syntax::Methods
+  config.include ApiHelpers, type: :request
 
   # Time Helper
   config.include ActiveSupport::Testing::TimeHelpers
