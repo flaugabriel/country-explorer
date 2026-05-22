@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { notify } from '../../utils/notify';
 import { fetchCountry, fetchSearchHistory } from '../../operations/countries';
+import { countryPtToEn } from '../../utils/countryPtToEn';
 import CountryCard from '../../components/CountryCard';
 import SearchInput from '../../components/SearchInput';
 import SearchHistoryList from '../../components/SearchHistoryList';
@@ -26,7 +27,11 @@ const Countries = () => {
     setLoading(true);
     setCountry(null);
 
-    fetchCountry(authorization, name)
+    // Tradução PT->EN se necessário
+    const nameLower = name.trim().toLowerCase();
+    const translated = countryPtToEn[nameLower] || name;
+
+    fetchCountry(authorization, translated)
       .then((res) => {
         setCountry(res.data?.data);
         loadHistory();
